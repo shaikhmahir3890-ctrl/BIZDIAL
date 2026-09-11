@@ -8,7 +8,8 @@ import {
   Review as MockReview
 } from './mock-data';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://bizdial.onrender.com/api';
+
 
 export type Review = MockReview;
 export type Business = MockBusiness;

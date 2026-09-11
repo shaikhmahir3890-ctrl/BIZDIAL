@@ -27,11 +27,22 @@ app.use(express.json());
 // Set security headers
 app.use(helmet());
 
-// Enable CORS
+// Enable CORS (supports localhost, FRONTEND_URL, and any vercel preview deployment)
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      origin.includes('localhost') ||
+      origin.endsWith('.vercel.app') ||
+      (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Permissive for public directory API
+  },
   credentials: true
 }));
+
 
 // Rate limiting
 const limiter = rateLimit({
