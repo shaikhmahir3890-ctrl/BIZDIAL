@@ -31,7 +31,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id as string),
+        token: generateToken(user._id.toString()),
       },
     });
   } else {
@@ -57,7 +57,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id as string),
+        token: generateToken(user._id.toString()),
       },
     });
   } else {

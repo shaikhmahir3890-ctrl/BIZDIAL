@@ -78,14 +78,14 @@ reviewSchema.post('save', function () {
 });
 
 // Call getAverageRating after remove
-reviewSchema.pre('findOneAndDelete', async function (next) {
+reviewSchema.pre('findOneAndDelete', async function () {
   const doc = await this.model.findOne(this.getQuery());
   if (doc) {
     // Add it to query object to access it in post hook
     (this as any)._docToRemove = doc;
   }
-  next();
 });
+
 
 reviewSchema.post('findOneAndDelete', async function () {
   const doc = (this as any)._docToRemove;
