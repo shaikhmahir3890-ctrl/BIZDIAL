@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useState } from 'react';
-import { getBusinessById } from '@/lib/mock-data';
+import { use, useState, useEffect } from 'react';
+import { fetchBusinessById, Business } from '@/lib/api';
 import { notFound } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 
@@ -12,15 +12,34 @@ export default function BusinessPage({
 }) {
   const resolvedParams = use(params);
   const { t } = useLanguage();
-  const business = getBusinessById(resolvedParams.id);
+  
+  const [business, setBusiness] = useState<Business | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState('');
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const biz = await fetchBusinessById(resolvedParams.id);
+      if (biz) {
+        setBusiness(biz);
+        const imagesList = biz.images && biz.images.length > 0 ? biz.images : [biz.image];
+        setSelectedImage(imagesList[0]);
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, [resolvedParams.id]);
+
+  if (loading) {
+    return <div className="container mt-8"><p>Loading business details...</p></div>;
+  }
 
   if (!business) {
     notFound();
   }
 
   const imagesList = business.images && business.images.length > 0 ? business.images : [business.image];
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [selectedImage, setSelectedImage] = useState(imagesList[0]);
 
   return (
     <div className="business-page animate-fade-in">
@@ -99,7 +118,7 @@ export default function BusinessPage({
                       </div>
                       <div className="reviewer-info">
                         <span className="reviewer-name">{review.author}</span>
-                        <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
+                        <span className="review-date">{review.date}</span>
                       </div>
                     </div>
                     <div className="review-rating">
@@ -113,7 +132,7 @@ export default function BusinessPage({
                   </div>
                 ))
               ) : (
-                <p>{t('noReviewsYet')}</p>
+               <p>{t('noReviewsYet')}</p>
               )}
             </div>
           </section>

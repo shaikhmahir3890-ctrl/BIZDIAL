@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { categories, mockBusinesses } from '@/lib/mock-data';
+import { fetchCategories, fetchBusinesses, Business } from '@/lib/api';
 import { useLanguage } from '@/lib/i18n';
 
 // Card hover accent colors for variety
@@ -16,12 +16,28 @@ const accentColors = [
 
 export default function Home() {
   const { t } = useLanguage();
+  
+  const [categories, setCategories] = useState<any[]>([]);
+  const [mockBusinesses, setMockBusinesses] = useState<Business[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const [cats, bizs] = await Promise.all([
+        fetchCategories(),
+        fetchBusinesses()
+      ]);
+      setCategories(cats);
+      setMockBusinesses(bizs);
+    };
+    loadData();
+  }, []);
+
   // Display 16 featured businesses (1 per category)
   const featuredBusinesses = useMemo(() => 
     mockBusinesses.filter((biz, index, self) => 
       self.findIndex(b => b.category === biz.category) === index
     ).slice(0, 16),
-  []);
+  [mockBusinesses]);
 
   // Track active preview image for each business card (defaulting to index 0)
   const [activeImageIndices, setActiveImageIndices] = useState<Record<string, number>>({});

@@ -1,7 +1,7 @@
 "use client";
 
-import { use } from 'react';
-import { searchBusinesses, getBusinessesByCategory } from '@/lib/mock-data';
+import { use, useEffect, useState } from 'react';
+import { fetchBusinesses, Business } from '@/lib/api';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
@@ -21,15 +21,24 @@ export default function SearchPage({
     redirect('/');
   }
 
-  let results = [];
+  const [results, setResults] = useState<Business[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadResults = async () => {
+      setLoading(true);
+      const bizs = await fetchBusinesses(query, categoryId);
+      setResults(bizs);
+      setLoading(false);
+    };
+    loadResults();
+  }, [query, categoryId]);
+
   let title = '';
 
   if (categoryId) {
-    results = getBusinessesByCategory(categoryId);
-    // Find category name to display in title
     title = `Category: ${categoryId}`;
   } else if (query) {
-    results = searchBusinesses(query);
     title = `Results for "${query}" in ${location}`;
   }
 
@@ -66,7 +75,9 @@ export default function SearchPage({
         </aside>
 
         <main className="results-list">
-          {results.length > 0 ? (
+          {loading ? (
+            <p>Loading...</p>
+          ) : results.length > 0 ? (
             results.map((biz) => (
               <Link href={`/business/${biz.id}`} key={biz.id} className="result-card">
                 <div className="result-image" style={{ backgroundImage: `url(${biz.image})` }}>
